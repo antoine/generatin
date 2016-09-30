@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Canvas tutorial</title>
+    <script type="text/javascript">
+      var width=1000;
+      var height=500;
+
+      var enough = 100;
+      var length = 100;
+      var speed=10;
+
+      var tree = {
+        starting_parameters:{
+            initial_x:width/2,
+            initial_y:  height/2},
+        branches:[]};
+
+      var parameters = {current_x:tree.starting_parameters.initial_x,
+            current_y:tree.starting_parameters.initial_y,
+            random_x : 1,
+            random_y : 2,
+            travel_x_increment: 1,
+            travel_y_increment:0.3}
+
+
+      var branch_made = false;
+
+      function start_iterating() {
+        var canvas = document.getElementById('tutorial');
+        if (canvas.getContext){
+          iterate(canvas.getContext('2d'), 'root', parameters);
+        }
+
+        setTimeout( reiterate, speed);
+      }
+
+      function reiterate() {
+        var canvas = document.getElementById('tutorial');
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        var current_x = tree.starting_parameters.initial_x;
+        var current_y = tree.starting_parameters.initial_y;
+
+        for (var i = 0; i < tree.branches.length; i++) {
+          var tree_part = tree.branches[i];
+          var rand = Math.random();
+          if (rand > 0.9) {
+                tree_part.diff_x += (Math.random() * parameters.travel_x_increment * 8)-4*parameters.travel_x_increment;
+                tree_part.diff_y += (Math.random() * parameters.travel_y_increment * 8)-4*parameters.travel_y_increment;
+          }
+          current_x += tree_part.diff_x;
+          current_y += tree_part.diff_y;
+          draw_circle(ctx,{
+            current_x : current_x,
+            current_y: current_y});
+
+          
+        }
+        enough--;
+        if (enough>0) {
+          setTimeout( reiterate, speed);
+        }
+
+      }
+
+      function iterate(canvas_context, context, p) {
+          for (var i = 0; i< length; i++) {
+            var diff_x = p.travel_x_increment + Math.random()* p.random_x;
+            var diff_y = p.travel_y_increment + Math.random()* p.random_y;
+            tree.branches[i] = 
+             {diff_x:diff_x,
+              diff_y:diff_y};
+            p.current_x += diff_x;
+            p.current_y += diff_y;
+            if (i%4 === 0) {
+              var rand = Math.random();
+              if (rand > 0.6) {
+                p.travel_x_increment += (Math.random() * p.travel_x_increment * 2)-p.travel_x_increment;
+                p.travel_y_increment += (Math.random() * p.travel_y_increment * 2)-p.travel_y_increment;
+                /*
+                if (!branch_made && rand > 0.8 && i > 40) {
+                  branch_made = true;
+                  iterate('branch',{
+                    current_x:p.current_x,
+                    current_y:p.current_y,
+                    random_x : -1,
+                    random_y : 2,
+                    travel_x_increment: -2,
+                    travel_y_increment:0.3,
+                    ctx : p.ctx});
+                }
+                */
+              }
+            }
+            
+            draw_circle(canvas_context, p);
+          }
+        }
+
+      function draw_circle(ctx, p){
+          var grey = enough.toString(16);
+          var color = '#'+grey+grey+grey;
+          ctx.beginPath();
+          ctx.arc(p.current_x, p.current_y, 20, 0, Math.PI*2);
+          ctx.fillStyle=color;
+          ctx.fill();
+      }
+
+    </script>
+    <style type="text/css">
+      canvas { border: 1px solid black; }
+    </style>
+  </head>
+  <body onload="start_iterating();">
+    <canvas id="tutorial" width="1000" height="500"></canvas>
+    <!--
+    <button onclick="javascript:draw()">buttong</button>
+    -->
+  </body>
+</html>
